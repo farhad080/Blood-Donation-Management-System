@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.roktim.controller.UserProfileController"
+            stylesheets="@../../../css/styles.css">
+
+    <!-- Top Navigation -->
+    <top>
+        <HBox styleClass="menu-bar" alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #DC143C; -fx-padding: 15px 30px;">
+            <Text text="🩸 ROKTIM" style="-fx-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="nav-button" style="-fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="30" style="-fx-background-color: #F5F5F5; -fx-padding: 40px;">
+
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <Text text="My Profile" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+                        <Text text="Manage your personal information" style="-fx-fill: #666666;"/>
+                    </VBox>
+                    <Button fx:id="editButton" text="Edit Profile" onAction="#handleEdit" styleClass="primary-button" prefWidth="150" prefHeight="40"/>
+                    <Button fx:id="saveButton" text="Save Changes" onAction="#handleSave" styleClass="primary-button" prefWidth="150" prefHeight="40" visible="false"/>
+                    <Button fx:id="cancelButton" text="Cancel" onAction="#handleCancel" styleClass="secondary-button" prefWidth="150" prefHeight="40" visible="false"/>
+                </HBox>
+
+                <!-- Profile Content -->
+                <HBox spacing="40" alignment="TOP_CENTER">
+
+                    <!-- Profile Picture Section -->
+                    <VBox spacing="15" alignment="CENTER" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15px;">
+                        <StackPane>
+                            <Circle radius="80" style="-fx-fill: #FFE5E5;"/>
+                            <ImageView fx:id="profileImageView" fitWidth="160" fitHeight="160" preserveRatio="true">
+                                <clip>
+                                    <Circle radius="80" centerX="80" centerY="80"/>
+                                </clip>
+                            </ImageView>
+                        </StackPane>
+                        <Button fx:id="changeImageButton" text="Change Picture" onAction="#handleChangeImage"
+                                styleClass="secondary-button" visible="false"/>
+                    </VBox>
+
+                    <!-- Profile Information Section -->
+                    <VBox spacing="20" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15px;">
+
+                        <!-- Name -->
+                        <VBox spacing="5">
+                            <Label text="Full Name" styleClass="form-label"/>
+                            <TextField fx:id="nameField" styleClass="form-field" editable="false"/>
+                        </VBox>
+
+                        <!-- Blood Group -->
+                        <VBox spacing="5">
+                            <Label text="Blood Group" styleClass="form-label"/>
+                            <ComboBox fx:id="bloodGroupCombo" styleClass="form-field" disable="true" prefWidth="200"/>
+                        </VBox>
+
+                        <!-- Phone -->
+                        <VBox spacing="5">
+                            <Label text="Phone Number" styleClass="form-label"/>
+                            <TextField fx:id="phoneField" styleClass="form-field" editable="false"/>
+                        </VBox>
+
+                        <!-- Email -->
+                        <VBox spacing="5">
+                            <Label text="Email" styleClass="form-label"/>
+                            <TextField fx:id="emailField" styleClass="form-field" editable="false"/>
+                        </VBox>
+
+                        <!-- Address -->
+                        <VBox spacing="5">
+                            <Label text="Address" styleClass="form-label"/>
+                            <TextArea fx:id="addressArea" styleClass="form-field" editable="false" prefRowCount="3"/>
+                        </VBox>
+
+                        <!-- Last Donation Date -->
+                        <VBox spacing="5">
+                            <Label text="Last Donation Date" styleClass="form-label"/>
+                            <DatePicker fx:id="lastDonationPicker" styleClass="form-field" disable="true"/>
+                        </VBox>
+
+                        <!-- Username (Read-only) -->
+                        <VBox spacing="5">
+                            <Label text="Username" styleClass="form-label"/>
+                            <TextField fx:id="usernameField" styleClass="form-field" editable="false" style="-fx-opacity: 0.7;"/>
+                        </VBox>
+
+                        <!-- Success/Error Message -->
+                        <Label fx:id="messageLabel" styleClass="error-label" visible="false" wrapText="true"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

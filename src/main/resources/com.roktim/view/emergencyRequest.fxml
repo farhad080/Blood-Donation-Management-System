@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane stylesheets="@../../../css/styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.roktim.controller.EmergencyRequestController">
+
+    <!-- Top Navigation -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #DC143C; -fx-padding: 15px 30px;" styleClass="menu-bar">
+            <Text style="-fx-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="ROKTIM" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleBackToDashboard" style="-fx-text-fill: white;" styleClass="nav-button" text="Back to Dashboard" />
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <ScrollPane fitToHeight="true" fitToWidth="true">
+            <VBox spacing="30" style="-fx-background-color: #F5F5F5; -fx-padding: 40px;">
+
+                <!-- Header -->
+                <VBox alignment="CENTER" spacing="10">
+                    <Text style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-fill: #DC143C;" text="🚨 Emergency Blood Request" />
+                    <Text style="-fx-fill: #666666; -fx-font-size: 14px;" text="Submit your urgent blood requirement request" />
+                </VBox>
+
+                <!-- Request Form -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 40px; -fx-background-radius: 15px; -fx-max-width: 800px; -fx-alignment: center;">
+
+                    <!-- Alert -->
+                    <HBox spacing="10" style="-fx-background-color: #FFF3CD; -fx-padding: 15px; -fx-background-radius: 8px;">
+                        <Text style="-fx-font-size: 20px;" />
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Text style="-fx-font-weight: bold; -fx-fill: #856404;" text="Important Notice" />
+                            <Text style="-fx-fill: #856404; -fx-font-size: 12px;" text="This is for emergency situations only. Our admin will review and forward your request to matching donors." wrappingWidth="600" />
+                        </VBox>
+                    </HBox>
+
+                    <!-- Form Fields -->
+                    <GridPane hgap="20" prefWidth="700" vgap="15">
+
+                        <!-- Patient Name -->
+                        <Label styleClass="form-label" text="Patient Name *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <TextField fx:id="patientNameField" prefWidth="400" promptText="Enter patient name" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <!-- Blood Group -->
+                        <Label styleClass="form-label" text="Required Blood Group *" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="bloodGroupCombo" prefWidth="200" promptText="Select blood group" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <!-- Location -->
+                        <Label styleClass="form-label" text="Location *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <TextField fx:id="locationField" prefWidth="400" promptText="Hospital name, area, city" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <!-- Contact Number -->
+                        <Label styleClass="form-label" text="Contact Number *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <TextField fx:id="contactField" prefWidth="400" promptText="01XXXXXXXXX" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                        <!-- Urgency Level -->
+                        <Label styleClass="form-label" text="Urgency Level *" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <ComboBox fx:id="urgencyCombo" prefWidth="200" promptText="Select urgency" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                        <!-- Message -->
+                        <Label styleClass="form-label" text="Additional Details" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                        <TextArea fx:id="messageArea" prefRowCount="4" prefWidth="400" promptText="Provide any additional information (optional)" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <columnConstraints>
+                     <ColumnConstraints />
+                     <ColumnConstraints />
+                  </columnConstraints>
+                  <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                  </rowConstraints>
+                    </GridPane>
+
+                    <!-- Error/Success Message -->
+                    <Label fx:id="messageLabel" styleClass="error-label" visible="false" wrapText="true" />
+
+                    <!-- Buttons -->
+                    <HBox alignment="CENTER" spacing="15">
+                        <Button onAction="#handleSubmit" prefHeight="45" prefWidth="200" styleClass="primary-button" text="Submit Request">
+                            <font>
+                                <Font name="System Bold" size="14" />
+                            </font>
+                        </Button>
+                        <Button onAction="#handleClear" prefHeight="45" prefWidth="150" styleClass="secondary-button" text="Clear Form" />
+                    </HBox>
+                </VBox>
+
+                <!-- Request History -->
+                <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15px;">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Text style="-fx-font-size: 20px; -fx-font-weight: bold;" text="📋 My Request History" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleRefresh" styleClass="secondary-button" text="Refresh" />
+                    </HBox>
+
+                    <TableView fx:id="requestTable" prefHeight="300">
+                        <columns>
+                            <TableColumn fx:id="idColumn" prefWidth="50" text="ID" />
+                            <TableColumn fx:id="patientColumn" prefWidth="150" text="Patient Name" />
+                            <TableColumn fx:id="bloodGroupColumn" prefWidth="100" text="Blood Group" />
+                            <TableColumn fx:id="locationColumn" prefWidth="200" text="Location" />
+                            <TableColumn fx:id="urgencyColumn" prefWidth="100" text="Urgency" />
+                            <TableColumn fx:id="statusColumn" prefWidth="100" text="Status" />
+                            <TableColumn fx:id="dateColumn" prefWidth="120" text="Request Date" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
