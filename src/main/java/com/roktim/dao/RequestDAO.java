@@ -36,11 +36,16 @@ public class RequestDAO {
             pstmt.setString(8, request.getStatus().name());
             pstmt.setDate(9, Date.valueOf(request.getDate()));
 
+            System.out.println("DEBUG: Creating request - UserID: " + request.getUserId() + ", PatientName: " + request.getPatientName() + 
+                    ", BloodGroup: " + request.getBloodGroup().getDisplayName() + ", Status: " + request.getStatus().name());
+
             int rowsAffected = pstmt.executeUpdate();
+            System.out.println("DEBUG: Rows affected: " + rowsAffected);
             return rowsAffected > 0;
 
         } catch (SQLException e) {
             System.err.println("✗ Error creating request: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -53,13 +58,18 @@ public class RequestDAO {
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setInt(1, userId);
+            System.out.println("DEBUG: Querying requests for user ID: " + userId);
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                requests.add(extractRequestFromResultSet(rs));
+                Request request = extractRequestFromResultSet(rs);
+                requests.add(request);
+                System.out.println("DEBUG: Retrieved request - ID: " + request.getId() + ", PatientName: " + request.getPatientName());
             }
+            System.out.println("DEBUG: Total requests found: " + requests.size());
         } catch (SQLException e) {
             System.err.println("✗ Error getting requests: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return requests;

@@ -101,15 +101,8 @@
                         <Text fx:id="donationsText" style="-fx-font-size: 24px; -fx-fill: #DC143C;" text="0 Times" />
                     </VBox>
 
-                    <!-- Card 3: Lives Saved -->
+                    <!-- Card 3: Blood Units -->
                     <VBox spacing="10" style="-fx-pref-width: 250px; -fx-pref-height: 150px;" styleClass="card" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Text style="-fx-font-size: 30px;" text="‪‪❤︎‬" />
-                        <Text style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Lives Impacted" />
-                        <Text fx:id="livesText" style="-fx-font-size: 24px; -fx-fill: #DC143C;" text="0 People" />
-                    </VBox>
-
-                    <!-- Card 4: Blood Units -->
-                    <VBox spacing="10" style="-fx-pref-width: 250px; -fx-pref-height: 150px;" styleClass="card" GridPane.columnIndex="1" GridPane.rowIndex="1">
                         <Text style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Blood Donated" />
                         <Text fx:id="unitsText" style="-fx-font-size: 24px; -fx-fill: #DC143C;" text="0 Units" />
                     </VBox>

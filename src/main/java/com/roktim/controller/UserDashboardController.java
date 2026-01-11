@@ -1,5 +1,10 @@
 package com.roktim.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
 import com.roktim.dao.DonationDAO;
 import com.roktim.dao.RequestDAO;
 import com.roktim.model.Donation;
@@ -9,17 +14,13 @@ import com.roktim.service.AuthService;
 import com.roktim.service.SessionManager;
 import com.roktim.util.ImageUtil;
 import com.roktim.util.NavigationUtil;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 public class UserDashboardController {
 
@@ -31,7 +32,6 @@ public class UserDashboardController {
     @FXML private Label totalDonationsLabel;
     @FXML private Text myRequestsText;
     @FXML private Text donationsText;
-    @FXML private Text livesText;
     @FXML private Text unitsText;
     @FXML private ListView<String> activityListView;
 
@@ -91,9 +91,6 @@ public class UserDashboardController {
 
             int totalUnits = donations.stream().mapToInt(Donation::getUnits).sum();
             unitsText.setText(totalUnits + " Units");
-
-            int livesImpacted = totalUnits * 3;
-            livesText.setText(livesImpacted + " People");
 
             List<Request> requests = requestDAO.getRequestsByUserId(currentUser.getId());
             long activeRequests = requests.stream()

@@ -107,22 +107,22 @@
                 </VBox>
 
                 <!-- Request History -->
-                <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15px;">
+                <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15px; -fx-min-height: 400px;">
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Text style="-fx-font-size: 20px; -fx-font-weight: bold;" text="📋 My Request History" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button onAction="#handleRefresh" styleClass="secondary-button" text="Refresh" />
                     </HBox>
 
-                    <TableView fx:id="requestTable" prefHeight="300">
+                    <TableView fx:id="requestTable" prefHeight="350" VBox.vgrow="ALWAYS" style="-fx-font-size: 12px; -fx-padding: 5px;">
                         <columns>
-                            <TableColumn fx:id="idColumn" prefWidth="50" text="ID" />
-                            <TableColumn fx:id="patientColumn" prefWidth="150" text="Patient Name" />
-                            <TableColumn fx:id="bloodGroupColumn" prefWidth="100" text="Blood Group" />
-                            <TableColumn fx:id="locationColumn" prefWidth="200" text="Location" />
-                            <TableColumn fx:id="urgencyColumn" prefWidth="100" text="Urgency" />
-                            <TableColumn fx:id="statusColumn" prefWidth="100" text="Status" />
-                            <TableColumn fx:id="dateColumn" prefWidth="120" text="Request Date" />
+                            <TableColumn fx:id="idColumn" prefWidth="40" text="ID" />
+                            <TableColumn fx:id="patientColumn" prefWidth="120" text="Patient Name" />
+                            <TableColumn fx:id="bloodGroupColumn" prefWidth="80" text="Blood Group" />
+                            <TableColumn fx:id="locationColumn" prefWidth="150" text="Location" />
+                            <TableColumn fx:id="urgencyColumn" prefWidth="80" text="Urgency" />
+                            <TableColumn fx:id="statusColumn" prefWidth="80" text="Status" />
+                            <TableColumn fx:id="dateColumn" prefWidth="100" text="Request Date" />
                         </columns>
                     </TableView>
                 </VBox>
