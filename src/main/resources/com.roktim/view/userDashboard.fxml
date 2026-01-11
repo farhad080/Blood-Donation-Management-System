@@ -51,7 +51,6 @@
 
                     <!-- Blood Group Badge -->
                     <HBox alignment="CENTER" spacing="5" styleClass="badge">
-                        <Text style="-fx-fill: white;" text="🩸" />
                         <Text fx:id="bloodGroupText" style="-fx-fill: white; -fx-font-weight: bold;" text="O+" />
                     </HBox>
                 </VBox>
@@ -111,7 +110,6 @@
 
                     <!-- Card 4: Blood Units -->
                     <VBox spacing="10" style="-fx-pref-width: 250px; -fx-pref-height: 150px;" styleClass="card" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                        <Text style="-fx-font-size: 30px;" text="🩸" />
                         <Text style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Blood Donated" />
                         <Text fx:id="unitsText" style="-fx-font-size: 24px; -fx-fill: #DC143C;" text="0 Units" />
                     </VBox>

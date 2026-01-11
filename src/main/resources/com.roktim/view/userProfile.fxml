@@ -14,7 +14,7 @@
     <!-- Top Navigation -->
     <top>
         <HBox styleClass="menu-bar" alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #DC143C; -fx-padding: 15px 30px;">
-            <Text text="🩸 ROKTIM" style="-fx-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+            <Text text="ROKTIM" style="-fx-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="nav-button" style="-fx-text-fill: white;"/>
         </HBox>
