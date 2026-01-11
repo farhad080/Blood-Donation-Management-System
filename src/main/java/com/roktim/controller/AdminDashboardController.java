@@ -13,8 +13,11 @@ import com.roktim.model.BloodGroup;
 import com.roktim.model.Donation;
 import com.roktim.model.Inventory;
 import com.roktim.model.Request;
+import com.roktim.model.RequestStatus;
 import com.roktim.model.User;
 import com.roktim.model.UserRole;
+import com.roktim.service.AuthService;
+import com.roktim.util.NavigationUtil;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -34,6 +37,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class AdminDashboardController implements Initializable {
 
@@ -41,6 +46,7 @@ public class AdminDashboardController implements Initializable {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private final RequestDAO requestDAO = new RequestDAO();
     private final DonationDAO donationDAO = new DonationDAO();
+    private final AuthService authService = new AuthService();
 
     @FXML private ToggleButton navDashboard;
     @FXML private ToggleButton navDonors;
@@ -60,6 +66,7 @@ public class AdminDashboardController implements Initializable {
     @FXML private Label totalDonorsLabel;
     @FXML private Label totalUnitsLabel;
     @FXML private Label pendingRequestsLabel;
+    @FXML private javafx.scene.control.Button logoutButton;
 
     @FXML private TableView<Request> dashboardEmergencyTable;
     @FXML private TableView<User> donorTable;
@@ -121,7 +128,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private void handleLogout() {
-        // TODO: wire to existing logout/navigation logic
+        authService.logout();
+        Stage stage = (Stage) logoutButton.getScene().getWindow();
+        NavigationUtil.navigateTo(NavigationUtil.getViewPath("login.fxml"), stage);
     }
 
     @FXML
@@ -508,22 +517,320 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private void handleAddDonation() {
-        // TODO: log donation and update inventory
+        Dialog<Donation> dialog = new Dialog<>();
+        dialog.setTitle("Add Donation Record");
+        dialog.setHeaderText("Enter donation details");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        ComboBox<User> donorCombo = new ComboBox<>();
+        List<User> donors = userDAO.getAllDonors();
+        donorCombo.setItems(javafx.collections.FXCollections.observableArrayList(donors));
+        donorCombo.setPromptText("Select Donor");
+        
+        // Custom cell factory to display only donor name
+        donorCombo.setCellFactory(param -> new javafx.scene.control.ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText(user.getName());
+                }
+            }
+        });
+        
+        donorCombo.setButtonCell(new javafx.scene.control.ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText(user.getName());
+                }
+            }
+        });
+
+        ComboBox<String> bloodGroupCombo = new ComboBox<>();
+        bloodGroupCombo.setItems(javafx.collections.FXCollections.observableArrayList(
+            "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
+        ));
+        bloodGroupCombo.setPromptText("Select Blood Group");
+        
+        // Auto-populate blood group when donor is selected
+        donorCombo.setOnAction(e -> {
+            User selectedDonor = donorCombo.getValue();
+            if (selectedDonor != null && selectedDonor.getBloodGroup() != null) {
+                bloodGroupCombo.setValue(selectedDonor.getBloodGroup().getDisplayName());
+            }
+        });
+
+        javafx.scene.control.TextField unitsField = new javafx.scene.control.TextField();
+        unitsField.setPromptText("Units to Donate");
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setPromptText("Select Date");
+
+        grid.add(new Label("Donor:"), 0, 0);
+        grid.add(donorCombo, 1, 0);
+        grid.add(new Label("Blood Group:"), 0, 1);
+        grid.add(bloodGroupCombo, 1, 1);
+        grid.add(new Label("Units:"), 0, 2);
+        grid.add(unitsField, 1, 2);
+        grid.add(new Label("Date:"), 0, 3);
+        grid.add(datePicker, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                User selectedDonor = donorCombo.getValue();
+                String bloodGroup = bloodGroupCombo.getValue();
+                String unitsText = unitsField.getText().trim();
+                java.time.LocalDate donationDate = datePicker.getValue();
+
+                if (selectedDonor == null || bloodGroup == null || unitsText.isEmpty() || donationDate == null) {
+                    showAlert(Alert.AlertType.WARNING, "Incomplete Form", "Please fill in all fields.");
+                    return null;
+                }
+
+                try {
+                    int units = Integer.parseInt(unitsText);
+                    if (units <= 0) {
+                        showAlert(Alert.AlertType.WARNING, "Invalid Input", "Units must be a positive number.");
+                        return null;
+                    }
+
+                    Donation newDonation = new Donation();
+                    newDonation.setUserId(selectedDonor.getId());
+                    newDonation.setBloodGroup(BloodGroup.fromString(bloodGroup));
+                    newDonation.setUnits(units);
+                    newDonation.setDate(donationDate);
+
+                    return newDonation;
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.WARNING, "Invalid Input", "Units must be a valid number.");
+                }
+            }
+            return null;
+        });
+
+        Optional<Donation> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Donation newDonation = result.get();
+            if (newDonation != null && donationDAO.addDonation(newDonation)) {
+                // Update inventory
+                inventoryDAO.addUnits(newDonation.getBloodGroup(), newDonation.getUnits());
+                
+                // Update donor's last donation date
+                User donor = userDAO.getUserById(newDonation.getUserId());
+                if (donor != null) {
+                    donor.setLastDonation(newDonation.getDate());
+                    userDAO.updateUser(donor);
+                }
+                
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Donation record added successfully.");
+                loadTables();
+                loadDashboardMetrics();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add donation record.");
+            }
+        }
     }
 
     @FXML
     private void handleEditDonation() {
-        // TODO: edit selected donation
+        if (donationTable == null) return;
+        Donation selectedDonation = donationTable.getSelectionModel().getSelectedItem();
+        if (selectedDonation == null) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a donation record to edit.");
+            return;
+        }
+
+        Dialog<Donation> dialog = new Dialog<>();
+        dialog.setTitle("Edit Donation Record");
+        dialog.setHeaderText("Update donation details");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        ComboBox<User> donorCombo = new ComboBox<>();
+        List<User> donors = userDAO.getAllDonors();
+        donorCombo.setItems(javafx.collections.FXCollections.observableArrayList(donors));
+        
+        // Set current donor
+        User currentDonor = userDAO.getUserById(selectedDonation.getUserId());
+        if (currentDonor != null) {
+            donorCombo.setValue(currentDonor);
+        }
+        
+        // Custom cell factory to display only donor name
+        donorCombo.setCellFactory(param -> new javafx.scene.control.ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText(user.getName());
+                }
+            }
+        });
+        
+        donorCombo.setButtonCell(new javafx.scene.control.ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText(user.getName());
+                }
+            }
+        });
+
+        ComboBox<String> bloodGroupCombo = new ComboBox<>();
+        bloodGroupCombo.setItems(javafx.collections.FXCollections.observableArrayList(
+            "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
+        ));
+        bloodGroupCombo.setValue(selectedDonation.getBloodGroup().getDisplayName());
+        
+        // Auto-populate blood group when donor is selected
+        donorCombo.setOnAction(e -> {
+            User selectedDonor = donorCombo.getValue();
+            if (selectedDonor != null && selectedDonor.getBloodGroup() != null) {
+                bloodGroupCombo.setValue(selectedDonor.getBloodGroup().getDisplayName());
+            }
+        });
+
+        javafx.scene.control.TextField unitsField = new javafx.scene.control.TextField();
+        unitsField.setText(String.valueOf(selectedDonation.getUnits()));
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(selectedDonation.getDate());
+
+        grid.add(new Label("Donor:"), 0, 0);
+        grid.add(donorCombo, 1, 0);
+        grid.add(new Label("Blood Group:"), 0, 1);
+        grid.add(bloodGroupCombo, 1, 1);
+        grid.add(new Label("Units:"), 0, 2);
+        grid.add(unitsField, 1, 2);
+        grid.add(new Label("Date:"), 0, 3);
+        grid.add(datePicker, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                User selectedDonor = donorCombo.getValue();
+                String bloodGroup = bloodGroupCombo.getValue();
+                String unitsText = unitsField.getText().trim();
+                java.time.LocalDate donationDate = datePicker.getValue();
+
+                if (selectedDonor == null || bloodGroup == null || unitsText.isEmpty() || donationDate == null) {
+                    showAlert(Alert.AlertType.WARNING, "Incomplete Form", "Please fill in all fields.");
+                    return null;
+                }
+
+                try {
+                    int newUnits = Integer.parseInt(unitsText);
+                    if (newUnits <= 0) {
+                        showAlert(Alert.AlertType.WARNING, "Invalid Input", "Units must be a positive number.");
+                        return null;
+                    }
+
+                    // Calculate unit difference for inventory adjustment
+                    int unitDifference = newUnits - selectedDonation.getUnits();
+                    
+                    // Update donation
+                    selectedDonation.setUserId(selectedDonor.getId());
+                    selectedDonation.setBloodGroup(BloodGroup.fromString(bloodGroup));
+                    selectedDonation.setUnits(newUnits);
+                    selectedDonation.setDate(donationDate);
+                    
+                    // Store unit difference in a temporary field for later use
+                    selectedDonation.setDonorName(String.valueOf(unitDifference)); // Temporary storage
+                    
+                    return selectedDonation;
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.WARNING, "Invalid Input", "Units must be a valid number.");
+                }
+            }
+            return null;
+        });
+
+        Optional<Donation> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Donation updatedDonation = result.get();
+            if (updatedDonation != null) {
+                // Retrieve unit difference
+                int unitDifference = Integer.parseInt(updatedDonation.getDonorName());
+                updatedDonation.setDonorName(null); // Clear temporary storage
+                
+                if (donationDAO.updateDonation(updatedDonation)) {
+                    // Adjust inventory based on unit difference
+                    if (unitDifference != 0) {
+                        inventoryDAO.addUnits(updatedDonation.getBloodGroup(), unitDifference);
+                    }
+                    
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Donation record updated successfully.");
+                    loadTables();
+                    loadDashboardMetrics();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to update donation record.");
+                }
+            }
+        }
     }
 
     @FXML
     private void handleDeleteDonation() {
-        // TODO: delete selected donation
+        if (donationTable == null) return;
+        Donation selectedDonation = donationTable.getSelectionModel().getSelectedItem();
+        if (selectedDonation == null) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a donation record to delete.");
+            return;
+        }
+
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Delete Donation Record");
+        confirmAlert.setContentText("Are you sure you want to delete this donation record?\nThis will also adjust the blood inventory.");
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (donationDAO.deleteDonation(selectedDonation.getId())) {
+                // Subtract units from inventory
+                inventoryDAO.addUnits(selectedDonation.getBloodGroup(), -selectedDonation.getUnits());
+                
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Donation record deleted successfully.");
+                loadTables();
+                loadDashboardMetrics();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete donation record.");
+            }
+        }
     }
 
     @FXML
     private void handleSearchEmergency() {
-        // TODO: search emergency requests
+        String bloodGroup = emergencyGroupFilter != null ? emergencyGroupFilter.getValue() : null;
+        String location = emergencyLocationField != null ? emergencyLocationField.getText() : null;
+        
+        List<Request> searchResults = requestDAO.searchRequests(bloodGroup, location);
+        if (emergencyTable != null) {
+            emergencyTable.getItems().setAll(searchResults);
+        }
     }
 
     @FXML
@@ -534,16 +841,112 @@ public class AdminDashboardController implements Initializable {
         if (emergencyLocationField != null) {
             emergencyLocationField.clear();
         }
+        if (emergencyTable != null) {
+            emergencyTable.getItems().setAll(requestDAO.getAllRequests());
+        }
     }
 
     @FXML
     private void handleMarkFulfilled() {
-        // TODO: mark selected request as fulfilled
+        if (emergencyTable == null) return;
+        Request selectedRequest = emergencyTable.getSelectionModel().getSelectedItem();
+        if (selectedRequest == null) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a request to mark as fulfilled.");
+            return;
+        }
+
+        if (selectedRequest.getStatus() == RequestStatus.FULFILLED) {
+            showAlert(Alert.AlertType.INFORMATION, "Already Fulfilled", "This request is already marked as fulfilled.");
+            return;
+        }
+
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Action");
+        confirmAlert.setHeaderText("Mark Request as Fulfilled");
+        confirmAlert.setContentText("Are you sure you want to mark this request as fulfilled?\n\nPatient: " + 
+            selectedRequest.getPatientName() + "\nBlood Group: " + 
+            selectedRequest.getBloodGroup().getDisplayName());
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (requestDAO.updateRequestStatus(selectedRequest.getId(), RequestStatus.FULFILLED)) {
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Request marked as fulfilled successfully.");
+                loadTables();
+                loadDashboardMetrics();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update request status.");
+            }
+        }
     }
 
     @FXML
     private void handleFindMatchingDonors() {
-        // TODO: find donors matching selected request
+        if (emergencyTable == null) return;
+        Request selectedRequest = emergencyTable.getSelectionModel().getSelectedItem();
+        if (selectedRequest == null) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a request to find matching donors.");
+            return;
+        }
+
+        // Search for donors with matching blood group and location
+        String bloodGroup = selectedRequest.getBloodGroup().getDisplayName();
+        String location = selectedRequest.getLocation();
+        
+        List<User> matchingDonors = userDAO.searchDonors(bloodGroup, location);
+
+        // Create a dialog to display matching donors
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Matching Donors");
+        dialog.setHeaderText("Donors for " + selectedRequest.getPatientName() + " (" + bloodGroup + ")\nLocation: " + location);
+
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(20));
+
+        if (matchingDonors.isEmpty()) {
+            Label noResultLabel = new Label("No matching donors found in this location.");
+            noResultLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
+            content.getChildren().add(noResultLabel);
+        } else {
+            Label countLabel = new Label(matchingDonors.size() + " matching donor(s) found:");
+            countLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+            content.getChildren().add(countLabel);
+
+            TableView<User> donorResultsTable = new TableView<>();
+            donorResultsTable.setPrefHeight(300);
+            donorResultsTable.setPrefWidth(700);
+
+            TableColumn<User, String> nameCol = new TableColumn<>("Name");
+            nameCol.setPrefWidth(150);
+            nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+            TableColumn<User, String> phoneCol = new TableColumn<>("Phone");
+            phoneCol.setPrefWidth(130);
+            phoneCol.setCellValueFactory(new PropertyValueFactory<>("phone"));
+
+            TableColumn<User, String> emailCol = new TableColumn<>("Email");
+            emailCol.setPrefWidth(180);
+            emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+            TableColumn<User, String> addressCol = new TableColumn<>("Address");
+            addressCol.setPrefWidth(200);
+            addressCol.setCellValueFactory(new PropertyValueFactory<>("address"));
+
+            TableColumn<User, String> lastDonationCol = new TableColumn<>("Last Donation");
+            lastDonationCol.setPrefWidth(120);
+            lastDonationCol.setCellValueFactory(cell -> javafx.beans.binding.Bindings.createStringBinding(() -> {
+                return cell.getValue().getLastDonation() != null ? 
+                    cell.getValue().getLastDonation().toString() : "Never";
+            }));
+
+            donorResultsTable.getColumns().addAll(nameCol, phoneCol, emailCol, addressCol, lastDonationCol);
+            donorResultsTable.getItems().setAll(matchingDonors);
+
+            content.getChildren().add(donorResultsTable);
+        }
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
     }
 
     private void setupTables() {
@@ -588,8 +991,8 @@ public class AdminDashboardController implements Initializable {
 
         if (donationTable != null) {
             donationTable.getColumns().clear();
-            TableColumn<Donation, Integer> userIdCol = new TableColumn<>("Donor Id");
-            userIdCol.setCellValueFactory(new PropertyValueFactory<>("userId"));
+            TableColumn<Donation, String> donorNameCol = new TableColumn<>("Donor Name");
+            donorNameCol.setCellValueFactory(new PropertyValueFactory<>("donorName"));
             TableColumn<Donation, String> bgCol = new TableColumn<>("Blood Group");
             bgCol.setCellValueFactory(cell -> javafx.beans.binding.Bindings.createStringBinding(
                 () -> cell.getValue().getBloodGroup() != null ? cell.getValue().getBloodGroup().getDisplayName() : ""
@@ -600,7 +1003,7 @@ public class AdminDashboardController implements Initializable {
             dateCol.setCellValueFactory(cell -> javafx.beans.binding.Bindings.createStringBinding(() -> {
                 return cell.getValue().getDate() != null ? cell.getValue().getDate().toString() : "";
             }));
-            donationTable.getColumns().addAll(userIdCol, bgCol, unitsCol, dateCol);
+            donationTable.getColumns().addAll(donorNameCol, bgCol, unitsCol, dateCol);
         }
     }
 

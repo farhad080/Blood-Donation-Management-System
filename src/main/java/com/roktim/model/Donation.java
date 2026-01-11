@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class Donation {
     private int id;
     private int userId;
+    private String donorName;
     private BloodGroup bloodGroup;
     private int units;
     private LocalDate date;
@@ -24,6 +25,9 @@ public class Donation {
 
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
+
+    public String getDonorName() { return donorName; }
+    public void setDonorName(String donorName) { this.donorName = donorName; }
 
     public BloodGroup getBloodGroup() { return bloodGroup; }
     public void setBloodGroup(BloodGroup bloodGroup) { this.bloodGroup = bloodGroup; }

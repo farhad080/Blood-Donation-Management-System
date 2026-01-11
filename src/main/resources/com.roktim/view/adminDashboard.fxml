@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane fx:controller="com.roktim.controller.AdminDashboardController" stylesheets="@../../../css/styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" styleClass="dashboard-container">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="admin-header">
+            <Text text="Roktim" styleClass="header-title" />
+            <Label text="Admin Panel" styleClass="header-badge" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Text fx:id="greetingText" text="Hello, Admin" style="-fx-fill: white; -fx-font-weight: bold;" />
+            <Button fx:id="logoutButton" onAction="#handleLogout" text="Logout" styleClass="header-action" />
+        </HBox>
+    </top>
+
+    <left>
+        <VBox spacing="8" styleClass="sidebar" style="-fx-padding: 20; -fx-pref-width: 220;">
+            <fx:define>
+                <ToggleGroup fx:id="navGroup" />
+            </fx:define>
+            <Text text="Navigation" style="-fx-font-weight: bold; -fx-fill: #555555;" />
+            <ToggleButton fx:id="navDashboard" onAction="#showDashboard" text="Dashboard" toggleGroup="$navGroup" styleClass="nav-button" />
+            <ToggleButton fx:id="navDonors" onAction="#showDonors" text="Donor Management" toggleGroup="$navGroup" styleClass="nav-button" />
+            <ToggleButton fx:id="navInventory" onAction="#showInventory" text="Blood Inventory" toggleGroup="$navGroup" styleClass="nav-button" />
+            <ToggleButton fx:id="navDonations" onAction="#showDonations" text="Donation Records" toggleGroup="$navGroup" styleClass="nav-button" />
+            <ToggleButton fx:id="navEmergency" onAction="#showEmergency" text="Emergency Requests" toggleGroup="$navGroup" styleClass="nav-button" />
+        </VBox>
+    </left>
+
+    <center>
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="admin-tabpane">
+            <Tab fx:id="dashboardTab" text="Dashboard">
+                <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: transparent;">
+                    <VBox spacing="18">
+                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                        <VBox spacing="4">
+                            <Text text="Overview" styleClass="section-title" />
+                            <Text text="Key hospital metrics at a glance" styleClass="section-subtitle" />
+                        </VBox>
+                        <FlowPane hgap="16" vgap="16">
+                            <VBox styleClass="card" spacing="6" style="-fx-pref-width: 220; -fx-pref-height: 120;">
+                                <Label text="Total Registered Users" styleClass="card-title" />
+                                <Label fx:id="totalUsersLabel" text="0" styleClass="card-value" />
+                                <Label text="Updated now" styleClass="card-subtext" />
+                            </VBox>
+                            <VBox styleClass="card" spacing="6" style="-fx-pref-width: 220; -fx-pref-height: 120;">
+                                <Label text="Total Donors" styleClass="card-title" />
+                                <Label fx:id="totalDonorsLabel" text="0" styleClass="card-value" />
+                                <Label text="Active donors" styleClass="card-subtext" />
+                            </VBox>
+                            <VBox styleClass="card" spacing="6" style="-fx-pref-width: 220; -fx-pref-height: 120;">
+                                <Label text="Total Blood Units" styleClass="card-title" />
+                                <Label fx:id="totalUnitsLabel" text="0" styleClass="card-value" />
+                                <Label text="Across all groups" styleClass="card-subtext" />
+                            </VBox>
+                            <VBox styleClass="card" spacing="6" style="-fx-pref-width: 220; -fx-pref-height: 120;">
+                                <Label text="Pending Emergency Requests" styleClass="card-title" />
+                                <Label fx:id="pendingRequestsLabel" text="0" styleClass="card-value" />
+                                <Label text="Awaiting fulfillment" styleClass="card-subtext" />
+                            </VBox>
+                        </FlowPane>
+
+                        <VBox spacing="8">
+                            <Text text="Emergency Requests" styleClass="section-title" />
+                            <TableView fx:id="dashboardEmergencyTable" prefHeight="220" styleClass="card">
+                                <columns>
+                                    <TableColumn text="Blood Group" prefWidth="120" />
+                                    <TableColumn text="Location" prefWidth="180" />
+                                    <TableColumn text="Message" prefWidth="280" />
+                                    <TableColumn text="Status" prefWidth="120" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <Tab fx:id="donorsTab" text="Donor Management">
+                <VBox spacing="14">
+                    <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                    <VBox spacing="4">
+                        <Text text="Donor Management" styleClass="section-title" />
+                        <Text text="Search, add, and update donor profiles" styleClass="section-subtitle" />
+                    </VBox>
+
+                    <VBox styleClass="card" spacing="12">
+                        <GridPane hgap="12" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="33" />
+                                <ColumnConstraints percentWidth="33" />
+                                <ColumnConstraints percentWidth="34" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints />
+                            </rowConstraints>
+                            <Label text="Blood Group" GridPane.columnIndex="0" />
+                            <ComboBox fx:id="donorBloodGroupFilter" promptText="All" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+
+                            <Label text="Location" GridPane.columnIndex="1" />
+                            <TextField fx:id="donorLocationField" promptText="City / Area" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                            <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                <Button onAction="#handleSearchDonors" text="Search" styleClass="primary-button" />
+                                <Button onAction="#handleResetDonorFilters" text="Reset" styleClass="secondary-button" />
+                            </HBox>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <HBox spacing="8" styleClass="toolbar">
+                            <Button onAction="#handleAddDonor" text="Add Donor" styleClass="primary-button" />
+                            <Button onAction="#handleEditDonor" text="Edit" styleClass="secondary-button" />
+                            <Button onAction="#handleDeleteDonor" text="Delete" styleClass="secondary-button" />
+                        </HBox>
+                        <TableView fx:id="donorTable" prefHeight="360">
+                            <columns>
+                                <TableColumn text="Name" prefWidth="180" />
+                                <TableColumn text="Blood Group" prefWidth="120" />
+                                <TableColumn text="Phone" prefWidth="140" />
+                                <TableColumn text="Address" prefWidth="220" />
+                                <TableColumn text="Last Donation" prefWidth="140" />
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+            <Tab fx:id="inventoryTab" text="Blood Inventory">
+                <VBox spacing="14">
+                    <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                    <VBox spacing="4">
+                        <Text text="Blood Inventory" styleClass="section-title" />
+                        <Text text="Track available units across blood groups" styleClass="section-subtitle" />
+                    </VBox>
+                    <HBox spacing="8" styleClass="toolbar">
+                        <Button onAction="#handleUpdateUnits" text="Update" styleClass="secondary-button" />
+                    </HBox>
+                    <TableView fx:id="inventoryTable" prefHeight="420">
+                        <columns>
+                            <TableColumn text="Blood Group" prefWidth="200" />
+                            <TableColumn text="Available Units" prefWidth="200" />
+                            <TableColumn text="Last Updated" prefWidth="220" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <Tab fx:id="donationsTab" text="Donation Records">
+                <VBox spacing="14">
+                    <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                    <VBox spacing="4">
+                        <Text text="Donation Records" styleClass="section-title" />
+                        <Text text="Log donations and keep inventory in sync" styleClass="section-subtitle" />
+                    </VBox>
+                    <HBox spacing="8" styleClass="toolbar">
+                        <Button onAction="#handleAddDonation" text="Add Record" styleClass="primary-button" />
+                        <Button onAction="#handleEditDonation" text="Edit" styleClass="secondary-button" />
+                        <Button onAction="#handleDeleteDonation" text="Delete" styleClass="secondary-button" />
+                    </HBox>
+                    <TableView fx:id="donationTable" prefHeight="420">
+                        <columns>
+                            <TableColumn text="Donor Name" prefWidth="200" />
+                            <TableColumn text="Blood Group" prefWidth="140" />
+                            <TableColumn text="Units Donated" prefWidth="140" />
+                            <TableColumn text="Donation Date" prefWidth="160" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <Tab fx:id="emergencyTab" text="Emergency Requests">
+                <VBox spacing="14">
+                    <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                    <VBox spacing="4">
+                        <Text text="Emergency Requests" styleClass="section-title" />
+                        <Text text="Prioritize urgent needs and match donors" styleClass="section-subtitle" />
+                    </VBox>
+                    <GridPane hgap="12" vgap="12" styleClass="card">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33" />
+                            <ColumnConstraints percentWidth="33" />
+                            <ColumnConstraints percentWidth="34" />
+                        </columnConstraints>
+                        <Label text="Blood Group" GridPane.columnIndex="0" />
+                        <ComboBox fx:id="emergencyGroupFilter" promptText="All" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+
+                        <Label text="Location" GridPane.columnIndex="1" />
+                        <TextField fx:id="emergencyLocationField" promptText="City / Area" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                            <Button onAction="#handleSearchEmergency" text="Search" styleClass="primary-button" />
+                            <Button onAction="#handleResetEmergencyFilters" text="Reset" styleClass="secondary-button" />
+                        </HBox>
+                    </GridPane>
+
+                    <HBox spacing="8" styleClass="toolbar">
+                        <Button onAction="#handleMarkFulfilled" text="Mark Fulfilled" styleClass="primary-button" />
+                        <Button onAction="#handleFindMatchingDonors" text="Find Matching Donors" styleClass="secondary-button" />
+                    </HBox>
+
+                    <TableView fx:id="emergencyTable" prefHeight="380">
+                        <columns>
+                            <TableColumn text="Blood Group" prefWidth="140" />
+                            <TableColumn text="Location" prefWidth="180" />
+                            <TableColumn text="Message" prefWidth="260" />
+                            <TableColumn text="Status" prefWidth="120" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>
